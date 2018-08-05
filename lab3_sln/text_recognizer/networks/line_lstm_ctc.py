@@ -1,3 +1,5 @@
+# takes image in input. 
+
 from boltons.cacheutils import cachedproperty
 import tensorflow as tf
 import tensorflow.keras.backend as K
@@ -21,9 +23,9 @@ def line_lstm_ctc(input_shape, output_shape, window_width=28, window_stride=14):
         raise ValueError(f'Window width/stride need to generate at least {output_length} windows (currently {num_windows})')
 
     image_input = Input(shape=input_shape, name='image')
-    y_true = Input(shape=(output_length,), name='y_true')
+    y_true = Input(shape=(output_length,), name='y_true') # fixed-size representation with label-length padded.
     input_length = Input(shape=(1,), name='input_length')
-    label_length = Input(shape=(1,), name='label_length')
+    label_length = Input(shape=(1,), name='label_length') # true length of sequence
 
     gpu_present = len(device_lib.list_local_devices()) > 1
     lstm_fn = CuDNNLSTM if gpu_present else LSTM
@@ -62,7 +64,7 @@ def line_lstm_ctc(input_shape, output_shape, window_width=28, window_stride=14):
         arguments={'num_windows': num_windows}
     )(input_length)
 
-    ctc_loss_output = Lambda(
+    ctc_loss_output = Lambda( # ctc is complicated to implement. Used the Google distribution of same. 
         lambda x: K.ctc_batch_cost(x[0], x[1], x[2], x[3]),
         name='ctc_loss'
     )([y_true, softmax_output, input_length_processed, label_length])

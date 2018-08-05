@@ -28,7 +28,7 @@ class LineModelCtc(Model):
             network_args = {}
         network_args = {**default_network_args, **network_args}
         super().__init__(dataset_cls, network_fn, dataset_args, network_args)
-        self.batch_format_fn = format_batch_ctc
+        self.batch_format_fn = format_batch_ctc # function that needs an image. Actual true label provided. input_length
 
     def loss(self):
         """Dummy loss function: just pass through the loss that we computed in the network."""
@@ -118,8 +118,8 @@ def format_batch_ctc(batch_x, batch_y):
         'label_length': np.array(label_lengths)
     }
     batch_outputs = {
-        'ctc_loss': np.zeros(batch_size),  # dummy
-        'ctc_decoded': y_true
+        'ctc_loss': np.zeros(batch_size),  # dummy : keras is setup, data should be providing something that matches this. 
+        'ctc_decoded': y_true # loss-computation, marginalize over all possible alignments. decoding. 
     }
     return batch_inputs, batch_outputs
 

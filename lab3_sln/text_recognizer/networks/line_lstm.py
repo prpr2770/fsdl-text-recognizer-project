@@ -1,3 +1,5 @@
+# one variation on encoder-decoder architecture. 
+
 from boltons.cacheutils import cachedproperty
 import tensorflow as tf
 from tensorflow.python.client import device_lib

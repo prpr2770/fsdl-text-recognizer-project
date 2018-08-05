@@ -37,19 +37,24 @@ def line_cnn_sliding_window(
     )(image_reshaped)
     # (num_windows, image_height, window_width, 1)
 
+    # ------------------------------------------------
     # Make a LeNet and get rid of the last two layers (softmax and dropout)
     convnet = lenet((image_height, window_width, 1), (num_classes,))
     convnet = KerasModel(inputs=convnet.inputs, outputs=convnet.layers[-2].output)
-
     convnet_outputs = TimeDistributed(convnet)(image_patches)
     # (num_windows, 128)
-
+    
+    
+    # ------------------------------------------------
     # Now we have to get to (output_length, num_classes) shape. One way to do it is to do another sliding window with
     # width = floor(num_windows / output_length)
     # Note that this will likely produce too many items in the output sequence, so take only output_length,
     # and watch out that width is at least 2 (else we will only be able to predict on the first half of the line)
 
     ##### Your code below (Lab 2)
+    
+    
+    
     convnet_outputs_extra_dim = Lambda(lambda x: tf.expand_dims(x, -1))(convnet_outputs)
     # (num_windows, 128, 1)
 
@@ -65,6 +70,8 @@ def line_cnn_sliding_window(
     # Since we floor'd the calculation of width, we might have too many items in the sequence. Take only output_length.
     softmax_output = Lambda(lambda x: x[:, :output_length, :])(squeezed_conved_convnet_outputs)
     ##### Your code above (Lab 2)
+    
+    
 
     model = KerasModel(inputs=image_input, outputs=softmax_output)
     model.summary()
